@@ -1,0 +1,153 @@
+<HTML>
+	<HEAD>
+		<TITLE>GL4</TITLE>
+		<STYLE>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</STYLE>
+	</HEAD>
+	<BODY>
+
+		<BUTTON onclick='controllight()'>moving light</BUTTON>
+		<BUTTON onclick="controlobj()">moving object </BUTTON>
+		
+		<script src="js/Three.js"></script>
+		<script src="js/OrbitControls.js"></script>
+		<script src="js/OBJLoader.js"></script>
+		<script src="js/MTLLoader.js"></script>
+		<script src="js/TransformControls.js"></script>
+		<script src="js/dat.gui.min.js"></script>
+		<script src="js/gui.js"></script>
+
+
+		<SCRIPT>
+			var i=0;
+			
+			var mouseX = 0, mouseY = 0;
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+			var obj;
+			var control1;
+			var control2;
+			var scene=new THREE.Scene();
+			var camera=new THREE.PerspectiveCamera(75,window.innerWidth / window.innerHeight);
+			var renderer = new THREE.WebGLRenderer(); 
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );//create scene camera and renderer
+			
+			var light = new THREE.DirectionalLight( 0xF5F6CE);//directlight
+			light.position.set( 0, 0, 1 );
+      		scene.add( light );
+			
+			var ambient = new THREE.AmbientLight( 0xF5F6CE );//四面光
+      		scene.add( ambient );
+			
+			var t_Loader = new THREE.TextureLoader();
+			var color_material = new THREE.MeshPhongMaterial
+				( {     
+					color: 0xdddddd,
+					specular: 0x222222,
+					shininess: 10,
+					map: t_Loader.load( "merge3d.jpg" ),   //map
+				} );
+			
+			var mtlloader = new THREE.MTLLoader();
+		    var objloader = new THREE.OBJLoader();
+			mtlloader.load("merge3d.obj.mtl", function (MTL) {MTL.preload})
+			objloader.load('merge3d.obj', function (object) {
+	        obj=object;
+			obj.traverse( function ( child ) {
+	            if ( child instanceof THREE.Mesh ) {
+					child.material = color_material;
+	  				child.material.transparent = false;
+					child.material.needsUpdate = true; 
+					
+	                        }
+	                    } );
+	                    scene.add(obj);
+	                });
+		
+			camera.position.z = 25;
+			
+			document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+			var mouse=new mousexy();
+
+		var gui = new dat.GUI({
+				height : 5 * 32 - 1
+			});
+		var cam = gui.addFolder('mouse');
+		function mousexy(){
+		
+  this.xm = mouseX;
+  this.ym =mouseY;
+  }
+  mouse.xm=mouseX;
+  mouse.ym=mouseY;
+  
+		
+cam.add(mouse,'xm', 0, 100).listen();
+cam.add(mouse,'ym', 0, 100).listen();
+cam.open();
+var lig = gui.addFolder('light');
+lig.add(light.position, 'x', 0, 100).listen();
+lig.add(light.position, 'y', 0, 100).listen();
+lig.add(light.position, 'z', 0, 100).listen();
+lig.open();
+
+
+	/*		
+	
+			document.addEventListener("rightclick", 
+			function(){control2= new THREE.OrbitControls( camera, renderer.domElement );
+			animate();})
+			
+			document.addEventListener("click", 
+			function(){control1= new THREE.OrbitControls( light, renderer.domElement );
+			animate();})
+	*/
+			function animate() 
+			{
+				requestAnimationFrame( animate );
+				 mouse.xm=mouseX;
+  mouse.ym=mouseY;	
+				if(i==0)
+				{
+				
+				light.position.x += ( mouseX - light.position.x ) * .05;
+				light.position.y += ( - mouseY - light.position.y ) * .05;
+			}
+			else
+			{
+				obj.rotation.x += ( mouseX - obj.rotation.x ) * .0001;
+				obj.rotation.y += ( mouseY - obj.rotation.y ) * .0001;}
+				renderer.render( scene, camera );
+	
+				
+			}
+			animate();
+			function onDocumentMouseMove( event ) {
+				
+		
+				mouseX = ( event.clientX - windowHalfX ) / 2;
+				mouseY = ( event.clientY - windowHalfY ) / 2;
+			
+			}
+			function controllight()
+			{
+				i=0;
+				animate();
+			}
+			function controlobj()
+			{
+				i=1;
+		
+				//control camera
+				//delete control1;
+
+				animate();
+			}
+
+			
+		</SCRIPT>
+	</BODY>
+</HTML>
