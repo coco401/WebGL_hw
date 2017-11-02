@@ -1,0 +1,274 @@
+<HTML>
+	<HEAD>
+	<TITLE>GL5</TITLE>
+	<STYLE>
+		body { margin: 0; }
+		canvas { width: 100%; height: 100% }
+		.button {
+		background-color: #4CAF50;
+		border: none;
+		color: white;
+		padding: 15px 32px;
+		text-align: center;
+		text-decoration: none;
+		display: inline-block;
+		font-size: 16px;
+		margin: 4px 2px;
+		cursor: pointer;
+		}
+	</STYLE>
+	</HEAD>
+	<BODY>
+	<a href="#" class="button">HAIYANG</a>
+	<button onclick="hastexture()">hastexture</button>
+	<button onclick="nontexture()">nontexture</button>
+	<button onclick="normalMap()">normalMap</button>
+	<button onclick="nonormalMap()">nonormalMap</button>
+	<button onclick="zoomin()">zoomin</button>
+	<button onclick="zoomout()">zoomout</button>
+	
+	<script src="js/Three.js"></script>
+	<script src="js/PLYLoader.js"></script>
+	<script src="js/OrbitControls.js"></script>
+	<script src="js/OBJLoader.js"></script>
+	<script src="js/MTLLoader.js"></script>
+	<script src="js/TransformControls.js"></script>
+	<script src="js/dat.gui.min.js"></script>
+	<script src="js/gui.js"></script>
+	<script src="js/stats.min.js"></script>
+	
+	<script>
+		var container, stats;
+		container = document.createElement( 'div' );
+		document.body.appendChild( container );
+		stats = new Stats();
+		container.appendChild( stats.dom );
+		var mouseX = 0, mouseY = 0;
+		var windowHalfX = window.innerWidth / 2;
+		var windowHalfY = window.innerHeight / 2;
+		var obj;
+		var obj2;
+		var obj3;
+		var obj4;
+		var has_texture=true;
+		var has_normal=true;
+		var scene=new THREE.Scene();
+		var camera=new THREE.PerspectiveCamera(75,window.innerWidth / window.innerHeight);
+		var renderer = new THREE.WebGLRenderer(); 
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		document.body.appendChild( renderer.domElement );//create scene camera and renderer
+		
+		var light = new THREE.DirectionalLight( 0xF5F6CE);//directlight
+		light.position.set( 0, 0, 1 );
+		scene.add( light );
+		var ambient = new THREE.AmbientLight( 0xF5F6CE );//四面光
+		scene.add( ambient );
+		
+		camera.position.z = 75;
+		
+		document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+		controls = new THREE.OrbitControls( camera, renderer.domElement );
+		
+		//ply loader
+		var loader = new THREE.PLYLoader();
+		loader.load( 'james.ply', function ( geometry ) {
+		
+			geometry.computeVertexNormals();
+			var material = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, shininess: 160, vertexColors: THREE.VertexColors} );
+			var mesh = new THREE.Mesh( geometry, material );
+			mesh.position.x =   0;
+			mesh.position.y =   0;
+			mesh.position.z =   250;
+			console.log(mesh.normal);
+			scene.add( mesh );	
+			
+		})
+		animate();
+	
+		
+		function nontexture()
+		{
+			remove()
+			var t_Loader = new THREE.TextureLoader();    //材质
+			var color_material = new THREE.MeshPhongMaterial( {     
+				color: 0xdddddd,
+				specular: 0x222222,
+				shininess: 15,
+				//map: t_Loader.load( "merge3dEdit.jpeg" ),   //map
+				//normalMap: t_Loader.load( "merge3d_NRM_adjust.png" ), //normal
+				normalScale: new THREE.Vector2(1,1 )
+			} );
+			//normal map
+			var loader = new THREE.MTLLoader();
+			var objloader = new THREE.OBJLoader();
+			loader.load("merge3d.obj.mtl", function (mtl) {
+			//objloader.setMaterials(mtl);
+					mtl.preload();
+					
+				})
+			objloader.load('merge3d.obj', function (object) {
+			obj = object;	        
+			obj.traverse( function ( child ) {
+				if ( child instanceof THREE.Mesh ) {
+					child.material = color_material;
+					child.material.transparent = false;
+					child.material.needsUpdate = true; 
+					}
+			});
+				object.translateX(-36);
+		            object.translateY(160);
+		            object.translateZ(-710);
+		            object.scale.set(9.1,9.1,9.1)
+			scene.add(object);
+			});
+		}
+		function hastexture()
+		{
+			remove()
+			var t_Loader = new THREE.TextureLoader();    //材质
+			var color_material = new THREE.MeshPhongMaterial( {     
+					color: 0xdddddd,
+					specular: 0x222222,
+					shininess: 10,
+					map: t_Loader.load( "merge3dEdit.jpeg" ),   //map
+					normalMap: t_Loader.load( "merge3d_NRM_adjust.png" ), //normal
+					normalScale: new THREE.Vector2( 1.2,1.2 )
+			} );
+			//normal map
+			var loader = new THREE.MTLLoader();
+			var objloader = new THREE.OBJLoader();
+				loader.load("merge3d.obj.mtl", function (mtl) {
+			//objloader.setMaterials(mtl);
+					mtl.preload();
+					
+				})
+			objloader.load('merge3d.obj', function (object) {
+			obj = object;	        
+			obj.traverse( function ( child ) {
+				if ( child instanceof THREE.Mesh ) {
+					child.material = color_material;
+					child.material.transparent = false;
+					child.material.needsUpdate = true; 
+							}
+						} );
+							object.translateX(-36);
+		            object.translateY(160);
+		            object.translateZ(-710);
+		            object.scale.set(9.1,9.1,9.1)
+				scene.add(object);
+			});
+		}
+		function normalMap()
+		{
+				remove()
+				var t_Loader = new THREE.TextureLoader();    //材质
+	    	var color_material = new THREE.MeshPhongMaterial( {     
+					color: 0xdddddd,
+					specular: 0x222222,
+					shininess: 20,
+					//map: t_Loader.load( "merge3dEdit.jpeg" ),   //map
+					normalMap: t_Loader.load( "merge3d_NRM_adjust.png" ), //normal
+					normalScale: new THREE.Vector2( 1.2,1.2 )
+				} );
+	    	//normal map
+		    var loader = new THREE.MTLLoader();
+		    var objloader = new THREE.OBJLoader();
+	            loader.load("merge3d.obj.mtl", function (mtl) {
+			//objloader.setMaterials(mtl);
+	                mtl.preload();
+	                
+	            })
+	        objloader.load('merge3d.obj', function (object) {
+	        obj3 = object;	        
+			obj3.traverse( function ( child ) {
+	            if ( child instanceof THREE.Mesh ) {
+					child.material = color_material;
+	  				child.material.transparent = false;
+					child.material.needsUpdate = true; 
+					
+	                        }
+	                    } );
+							object.translateX(-36);
+		            object.translateY(160);
+		            object.translateZ(-710);
+		            object.scale.set(9.1,9.1,9.1)
+	                    scene.add(object);
+	                });
+			}		
+		function nonormalMap()
+		{
+			remove()
+			var t_Loader = new THREE.TextureLoader();    //材质
+	    	var color_material = new THREE.MeshPhongMaterial( {     
+					color: 0xdddddd,
+					specular: 0x222222,
+					shininess: 20,
+					map: t_Loader.load( "merge3dEdit.jpeg" ),   //map
+					//normalMap: t_Loader.load( "merge3d_NRM_adjust.png" ), //normal
+					//normalScale: new THREE.Vector2( 1.2,1.2 )
+				} );
+	    	//normal map
+		    var loader = new THREE.MTLLoader();
+		    var objloader = new THREE.OBJLoader();
+	            loader.load("merge3d.obj.mtl", function (mtl) {
+			//objloader.setMaterials(mtl);
+	                mtl.preload();
+	                
+	            })
+	        objloader.load('merge3d.obj', function (object) {
+	        obj4 = object;	        
+			obj4.traverse( function ( child ) {
+	            if ( child instanceof THREE.Mesh ) {
+					child.material = color_material;
+	  				child.material.transparent = false;
+					child.material.needsUpdate = true; 
+					
+	                        }
+	                    } );
+									object.translateX(-36);
+		            object.translateY(160);
+		            object.translateZ(-710);
+		            object.scale.set(9.1,9.1,9.1)
+	                    scene.add(object);
+	                });
+			}	
+		function onDocumentMouseMove( event ) {
+		
+			mouseX = ( event.clientX - windowHalfX ) / 2;
+			mouseY = ( event.clientY - windowHalfY ) / 2;
+			
+		}
+		
+		function animate() 
+		{
+			requestAnimationFrame( animate );
+			light.position.x += ( mouseX - light.position.x ) * .05;
+			light.position.y += ( - mouseY - light.position.y ) * .05;
+			
+			
+			renderer.render( scene, camera );
+			stats.update();
+			
+		}
+		function zoomin()
+		{
+			camera.position.z+=100;
+		 
+		}
+		function zoomout()
+		{
+			camera.position.z-=100;
+		}
+		
+		function remove() 
+			{
+				scene.remove(obj);
+				scene.remove(obj2);
+				scene.remove(obj3);
+				scene.remove(obj4);
+			}
+			
+
+	</script>
+	</BODY>		
+</HTML>
